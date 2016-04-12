@@ -1,10 +1,6 @@
 - view: customer_last_month
   extends: customer_monthly_facts
 
-
-
-
-
 - view: customer_monthly_facts
   derived_table:
     sql: |
@@ -49,10 +45,9 @@
     sql: ${TABLE}.month_value
     value_format_name: usd
     
-  - dimension: churn
-    type: number
-    sql: ${customer_last_month.month_value} - ${month_value}
-    value_format_name: usd
+  - dimension: spent_last_month
+    type: yesno
+    sql: ${customer_last_month.month_value} > 0
     
   - measure: average_monthly_value
     type: average
@@ -63,16 +58,49 @@
     type: average
     sql: ${month_visits}
     
-  - measure: total_churn
-    type: sum
-    sql: ${churn}
+#THIS MONTH
+  - measure: average_month_active_customer_value
+    type: average
+    sql: ${month_value}
     value_format_name: usd
     filters:
       customer_facts.returned: yes
+      spent_last_month: yes    
+
+  - measure: total_month_active_customer_value
+    type: sum
+    sql: ${month_value}
+    value_format_name: usd
+    filters:
+      customer_facts.returned: yes
+      spent_last_month: yes   
+
+#LAST MONTH
+  - measure: average_last_month_active_customer_value
+    type: average
+    sql: ${customer_last_month.month_value}
+    value_format_name: usd
+    filters:
+      customer_facts.returned: yes
+      spent_last_month: yes    
+
+  - measure: total_last_month_active_customer_value
+    type: sum
+    sql: ${customer_last_month.month_value}
+    value_format_name: usd
+    filters:
+      customer_facts.returned: yes
+      spent_last_month: yes    
       
+  - measure: total_churn
+    type: number
+    sql: ${total_last_month_active_customer_value} - ${total_month_active_customer_value}
+    value_format_name: usd
+
+
   - measure: total_churn_percentage
     type: number
-    sql: 1.0 * ${total_churn} / NULLIF(${customer_facts.total_repeat_customer_value},0)
+    sql: 1.0 * ${total_churn} / NULLIF(${total_last_month_active_customer_value},0)
     value_format_name: percent_2
     
   sets:
