@@ -2,94 +2,121 @@
 - view: customer_facts
   derived_table:
     sql: |
-      SELECT 
-        md5(CONCAT((appointments.`Card Brand`) , (appointments.`PAN Suffix`))) AS user_id
-        , COUNT(*) AS lifetime_visits
-        , COALESCE(SUM((appointments.`Gross Sales`)),0) AS lifetime_value
-        , MIN(appointments.Datetime) AS first_visit
-        , MAX(appointments.Datetime) AS last_visit
-      
-      FROM transactions AS appointments
-      GROUP BY 1
-      
+      SELECT * 
+      , @curRank := @curRank + 1 AS rank
+      FROM
+        (SELECT 
+          md5(CONCAT((appointments.`Card Brand`) , (appointments.`PAN Suffix`))) AS user_id
+          , COUNT(*) AS lifetime_visits
+          , COALESCE(SUM((appointments.`Gross Sales`)),0) AS lifetime_value
+          , MIN(appointments.Datetime) AS first_visit
+          , MAX(appointments.Datetime) AS last_visit
+        
+        FROM transactions AS appointments
+        GROUP BY 1
+        ORDER BY lifetime_value DESC)  a
+        , (SELECT @curRank := 0) r
+        
 
   fields:
   - dimension: user_id
+    description: This is a random number based on the credit card used to identify a person.
     primary_key: true
     type: string
     sql: ${TABLE}.user_id
 
   - dimension: lifetime_visits
+    description: This is the number of times this person has visited Joli.
     type: number
     sql: ${TABLE}.lifetime_visits
 
   - dimension: lifetime_value
+    description: This is the total amount this person spent at Joli.
     type: number
     sql: ${TABLE}.lifetime_value
     value_format_name: usd
 
   - dimension_group: first_visit
+    description: This is the time of this customer's first visit.
     type: time
     timeframes: [raw, time, date, week, month]
     sql: ${TABLE}.first_visit
 
   - dimension_group: last_visit
+    description: This is the time of this customer's last visit.
     type: time
     timeframes: [raw, time, date, week, month]
     sql: ${TABLE}.last_visit
     
+  - dimension: rank
+    description: This is how valuable this customer is as a rank (#1 is the most valuable customer).
+    type: number
+    sql: ${TABLE}.rank
+    
   - dimension: days_as_customer
+    description: This is the number of days between the first and last visit of the customer.
     type: number
     sql: datediff(${last_visit_raw}, ${first_visit_raw})
   
   - dimension: is_active
+    description: Did this person come in within the past 30 days?
     type: yesno
     sql:  datediff(CURDATE(), ${last_visit_raw}) < 30
     
   - dimension: returned
+    description: Has this person visited Joli more than once?
     type: yesno
     sql: ${lifetime_visits} > 1
     
   - measure: count
+    description: This is the total number of customers.
     type: count
     drill_fields: detail*
     
   - measure: count_active_customers
+    description: This is the total number of customers who have come in the past 30 days
     type: count
     filters:
       is_active: yes
     drill_fields: detail*
       
   - measure: average_lifetime_value
+    description: This is average that ALL customers have spent at Joli over their lifetime as customers.
     type: average
     sql: ${lifetime_value}
     drill_fields: detail*
     value_format_name: usd
-    
+
+  - measure: average_repeat_customer_lifetime_value
+    description: This is average that all customers have spent at Joli over their lifetime as customers.
+    type: average
+    sql: ${lifetime_value}
+    drill_fields: detail*
+    value_format_name: usd
+    filters:
+      returned: yes  
+      
   - measure: average_lifetime_visits
+    description: This is average number of times that ALL customers have visited Joli.
     type: average
     sql: ${lifetime_visits}
     drill_fields: detail*
     value_format_name: decimal_2
+
+  - measure: average_repeat_customer_lifetime_visits
+    description: This is average number of times that REPEAT customers have visited Joli.
+    type: average
+    sql: ${lifetime_visits}
+    drill_fields: detail*
+    value_format_name: decimal_2
+    filters:
+      returned: yes    
     
   - measure: count_repeat_customers
+    description: This is how many customers have come back for a second appointment. 
     type: count
     filters:
       returned: yes
-      
-  - measure: total_repeat_customer_value
-    type: sum
-    sql: ${lifetime_value}
-    value_format_name: usd
-    filters:
-      returned: yes
-    
-  - measure: average_repeat_customer_value
-    type: average
-    sql: ${lifetime_value}
-    value_format_name: usd
-    filters:
-      returned: yes  
 
   sets:
     detail:

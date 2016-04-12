@@ -4,9 +4,11 @@
 - include: "*.dashboard.lookml"  # include all the dashboards
 
 - explore: appointments
+  label: Joli Client & Appointment Information
   persist_for: 0 minutes
   joins:
     - join: customer_facts
+      view_label: Customer
       relationship: many_to_one
       sql_on: ${appointments.user_id} = ${customer_facts.user_id}
       
@@ -17,7 +19,6 @@
         AND ${appointments.user_id} = ${customer_monthly_facts.user_id}
 
     - join: customer_last_month
-#       from: customer_monthly_facts
       fields: []
       relationship: many_to_one
       sql_on: |
