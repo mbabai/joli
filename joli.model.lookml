@@ -4,6 +4,7 @@
 - include: "*.dashboard.lookml"  # include all the dashboards
 
 - explore: appointments
+  persist_for: 0 minutes
   joins:
     - join: customer_facts
       relationship: many_to_one
