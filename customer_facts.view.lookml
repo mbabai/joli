@@ -70,6 +70,7 @@
     type: average
     sql: ${lifetime_visits}
     drill_fields: detail*
+    value_format_name: decimal_2
     
   - measure: count_repeat_customers
     type: count

@@ -57,6 +57,7 @@
   - measure: average_month_visits
     type: average
     sql: ${month_visits}
+    value_format_name: decimal_2
     
 #THIS MONTH
   - measure: average_month_active_customer_value
