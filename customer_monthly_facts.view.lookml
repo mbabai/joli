@@ -14,6 +14,8 @@
       
       GROUP BY 1,2,3
       ORDER BY 1,2
+    persist_for: 24 hours   
+    indexes: [user_id]
 
   fields:
   - dimension: user_id

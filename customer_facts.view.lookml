@@ -16,7 +16,8 @@
         GROUP BY 1
         ORDER BY lifetime_value DESC)  a
         , (SELECT @curRank := 0) r
-        
+    persist_for: 24 hours   
+    indexes: [user_id]
 
   fields:
   - dimension: user_id
