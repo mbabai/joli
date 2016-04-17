@@ -117,6 +117,12 @@
     type: count
     filters:
       returned: yes
+      
+  - measure: percent_repeat_customer
+    description: This is the percent of people who walk in the door and come back. 
+    type: number
+    sql: 1.0 * ${count_repeat_customers} / NULLIF(${count},0)
+    value_format_name: percent_2
 
   sets:
     detail:
