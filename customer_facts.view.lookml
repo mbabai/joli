@@ -119,7 +119,7 @@
       returned: yes
       
   - measure: percent_repeat_customer
-    description: This is the percent of people who walk in the door and come back. 
+    description: This is the percent of people who have come back for a second appointment.  
     type: number
     sql: 1.0 * ${count_repeat_customers} / NULLIF(${count},0)
     value_format_name: percent_2
