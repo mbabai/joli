@@ -1,5 +1,5 @@
 - connection: marcell_ql
-
+#78bbea #this is the Joli Blue
 - include: "*.view.lookml"       # include all the views
 - include: "*.dashboard.lookml"  # include all the dashboards
 
@@ -13,6 +13,7 @@
       sql_on: ${appointments.user_id} = ${customer_facts.user_id}
       
     - join: customer_monthly_facts
+      view_label: Customer Facts By Month
       relationship: many_to_one
       sql_on: |
         ${appointments.created_month} = ${customer_monthly_facts.visit_month} 

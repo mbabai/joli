@@ -20,10 +20,16 @@
 
   fields:
   - dimension: user_id
+    label: 
     description: This is a random number based on the credit card used to identify a person.
     primary_key: true
     type: string
     sql: ${TABLE}.user_id
+    html: |
+      User Lookup
+    links:
+    - label: User Dashboard
+      url: /dashboards/2?User ID={{ value }}
 
   - dimension: lifetime_visits
     description: This is the number of times this person has visited Joli.
@@ -117,6 +123,7 @@
     type: count
     filters:
       returned: yes
+    drill_fields: detail*
       
   - measure: percent_repeat_customer
     description: This is the percent of people who have come back for a second appointment.  
@@ -126,7 +133,7 @@
 
   sets:
     detail:
-      - name
+      - user_id
       - lifetime_visits
       - lifetime_value
       - first_visit_time
