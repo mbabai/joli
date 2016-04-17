@@ -6,13 +6,13 @@
       , @curRank := @curRank + 1 AS rank
       FROM
         (SELECT 
-          md5(CONCAT((appointments.`Card Brand`) , (appointments.`PAN Suffix`))) AS user_id
+          md5(CONCAT((a.`Card Brand`) , (a.`PAN Suffix`))) AS user_id
           , COUNT(*) AS lifetime_visits
-          , COALESCE(SUM((appointments.`Gross Sales`)),0) AS lifetime_value
-          , MIN(appointments.Datetime) AS first_visit
-          , MAX(appointments.Datetime) AS last_visit
+          , COALESCE(SUM((a.`Gross Sales`)),0) AS lifetime_value
+          , MIN(a.Datetime) AS first_visit
+          , MAX(a.Datetime) AS last_visit
         
-        FROM transactions AS appointments
+        FROM transactions AS a
         GROUP BY 1
         ORDER BY lifetime_value DESC)  a
         , (SELECT @curRank := 0) r

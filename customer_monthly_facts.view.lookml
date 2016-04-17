@@ -5,12 +5,12 @@
   derived_table:
     sql: |
       SELECT 
-        DATE_FORMAT(appointments.Datetime,'%Y-%m') AS visit_month
-        , DATE_FORMAT(appointments.Datetime - INTERVAL 1 MONTH,'%Y-%m') as last_month
-        , md5(CONCAT((appointments.`Card Brand`) , (appointments.`PAN Suffix`))) AS user_id
+        DATE_FORMAT(a.Datetime,'%Y-%m') AS visit_month
+        , DATE_FORMAT(a.Datetime - INTERVAL 1 MONTH,'%Y-%m') as last_month
+        , md5(CONCAT((a.`Card Brand`) , (a.`PAN Suffix`))) AS user_id
         , COUNT(*) AS month_visits
-        , COALESCE(SUM((appointments.`Gross Sales`)),0) AS month_value
-      FROM transactions AS appointments
+        , COALESCE(SUM((a.`Gross Sales`)),0) AS month_value
+      FROM transactions AS a
       
       GROUP BY 1,2,3
       ORDER BY 1,2
