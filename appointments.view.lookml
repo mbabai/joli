@@ -19,7 +19,7 @@
     label: Is Before Today (by Month)
     description: This just splits every month into days that occured before today or after. 
     type: yesno
-    sql: ${created_day_of_month} < DAYOFMONTH(CURDATE())
+    sql: ${created_day_of_month} <= DAYOFMONTH(CURDATE())
     
   - dimension: user_id
     hidden: true
