@@ -1,6 +1,3 @@
-- view: customer_last_month
-  extends: customer_monthly_facts
-
 - view: customer_monthly_facts
   derived_table:
     sql: |

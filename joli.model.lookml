@@ -20,6 +20,7 @@
         AND ${appointments.user_id} = ${customer_monthly_facts.user_id}
 
     - join: customer_last_month
+      from: customer_monthly_facts
       fields: []
       relationship: many_to_one
       sql_on: |
