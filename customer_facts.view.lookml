@@ -16,7 +16,7 @@
         GROUP BY 1
         ORDER BY lifetime_value DESC)  a
         , (SELECT @curRank := 0) r
-    persist_for: 24 hours   
+    sql_trigger_value: SELECT MAX(datetime) from transactions
     indexes: [user_id]
 
   fields:

@@ -11,8 +11,14 @@
   - dimension_group: created
     description: This is the date of the appointment
     type: time
-    timeframes: [raw,time, date, week, month,quarter,year,day_of_week]
+#     timeframes: [raw,time, date, week, month,quarter,year,day_of_week]
     sql: ${datetime_raw}
+  
+  - dimension: is_before_today_month
+    label: Is Before Today (by Month)
+    description: This just splits every month into days that occured before today or after. 
+    type: yesno
+    sql: ${created_day_of_month} < DAYOFMONTH(CURDATE())
     
   - dimension: user_id
     hidden: true
