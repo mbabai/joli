@@ -7,6 +7,7 @@
     description: This is the gross sales on this credit card swipe.
     type: number
     sql: ${gross_sales}
+    value_format_name: usd
 
   - dimension_group: created
     description: This is the date of the appointment
