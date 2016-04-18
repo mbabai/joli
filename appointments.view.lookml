@@ -14,6 +14,7 @@
     sql: ${description}
     
   - dimension: tip_amount
+    description: How much tip was given (on the card) for this service.
     type: number
     sql: ${tip}
     value_format_name: usd
@@ -25,6 +26,7 @@
     sql: ${datetime_raw}
   
   - dimension: is_weekend
+    description: Was this appointment on a weekend (Saturday, Sunday).
     type: yesno
     sql: ${created_day_of_week}  IN ('Saturday', 'Sunday')
   
@@ -85,18 +87,21 @@
     value_format_name: percent_2
 
   - measure: total_tips
+    description: The total tip on the services.
     type: sum
     sql: ${tip_amount}
     value_format_name: usd
     drill_fields: detail*
 
   - measure: average_tips
+    description: The average tip on the services.
     type: average
     sql: ${tip_amount}
     value_format_name: usd
     drill_fields: detail*
     
   - measure: tip_percentage
+    description: The percent tip on the services.
     type: number
     sql: 1.0 * ${total_tips} / NULLIF(${total_revenue},0)
     value_format_name: percent_2
