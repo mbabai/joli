@@ -24,6 +24,10 @@
 #     timeframes: [raw,time, date, week, month,quarter,year,day_of_week]
     sql: ${datetime_raw}
   
+  - dimension: is_weekend
+    type: yesno
+    sql: ${created_day_of_week}  IN ('Saturday', 'Sunday')
+  
   - dimension: is_before_today_month
     label: Is Before Today (by Month)
     description: This just splits every month into days that occured before today or after. 
