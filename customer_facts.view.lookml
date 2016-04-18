@@ -65,7 +65,7 @@
     type: number
     sql: datediff(${last_visit_raw}, ${first_visit_raw})
   
-  - dimension: is_active
+  - dimension: is_recent
     description: Did this person come in within the past 30 days?
     type: yesno
     sql:  datediff(CURDATE(), ${last_visit_raw}) < 30
@@ -74,6 +74,11 @@
     description: Has this person visited Joli more than once?
     type: yesno
     sql: ${lifetime_visits} > 1
+    
+  - dimension: is_active
+    description: This person has come more than once AND within the past 30 days
+    type: yesno
+    sql: ${is_recent} and ${returned}
     
   - measure: count
     description: This is the total number of customers.
