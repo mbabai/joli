@@ -9,6 +9,15 @@
     sql: ${gross_sales}
     value_format_name: usd
 
+  - dimension: service
+    description: Description of the service paid for.
+    sql: ${description}
+    
+  - dimension: tip_amount
+    type: number
+    sql: ${tip}
+    value_format_name: usd
+
   - dimension_group: created
     description: This is the date of the appointment
     type: time
@@ -71,13 +80,24 @@
     sql: 1.0 * ${count_repeat_appointments} / NULLIF(${count},0)
     value_format_name: percent_2
 
-
+  - measure: total_tips
+    type: sum
+    sql: ${tip_amount}
+    value_format_name: usd
+    drill_fields: detail*
+    
+  - measure: tip_percentage
+    type: number
+    sql: 1.0 * ${total_tips} / NULLIF(${total_revenue},0)
+    value_format_name: percent_2
 
   sets:
     detail:
     - id
+    - staff_name
     - customer_facts.user_id
     - created_time
     - total_amount
+    - total_tips
     - description
 

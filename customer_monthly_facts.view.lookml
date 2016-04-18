@@ -52,7 +52,12 @@
     type: yesno
     sql: ${customer_last_month.month_value} > 0
     
-
+  - dimension: churn_category
+    sql_case: 
+      Positive: ${customer_last_month.month_value} > ${month_value}
+      Neutral: ${customer_last_month.month_value} = ${month_value}
+      Negative: ${customer_last_month.month_value} < ${month_value}
+      unknown: true
 
 #THIS MONTH
   - measure: average_month_active_customer_value
@@ -102,13 +107,12 @@
     sql: ${total_last_month_active_customer_value} - ${total_month_active_customer_value}
     value_format_name: usd
 
-
   - measure: total_churn_percentage
     description: This is the same as total churn, but as a percent of the previous month. 
     type: number
     sql: 1.0 * ${total_churn} / NULLIF(${total_last_month_active_customer_value},0)
     value_format_name: percent_2
-    
+  
   sets:
     detail:
       - customer_facts.user_id

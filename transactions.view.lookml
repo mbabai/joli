@@ -33,6 +33,7 @@
     sql: ${TABLE}.Datetime
 
   - dimension: description
+    hidden: true
     type: string
     sql: ${TABLE}.Description
 
@@ -72,6 +73,7 @@
     sql: ${TABLE}.`Gift Card Sales`
 
   - dimension: gross_sales
+    hidden: true
     type: number
     sql: ${TABLE}.`Gross Sales`
 
@@ -81,6 +83,7 @@
     sql: ${TABLE}.Location
 
   - dimension: net_sales
+    hidden: true
     type: number
     sql: ${TABLE}.`Net Sales`
 
