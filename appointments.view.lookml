@@ -85,6 +85,12 @@
     sql: ${tip_amount}
     value_format_name: usd
     drill_fields: detail*
+
+  - measure: average_tips
+    type: average
+    sql: ${tip_amount}
+    value_format_name: usd
+    drill_fields: detail*
     
   - measure: tip_percentage
     type: number
