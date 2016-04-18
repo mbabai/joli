@@ -52,16 +52,8 @@
     type: yesno
     sql: ${customer_last_month.month_value} > 0
     
-#   - measure: average_monthly_value
-#     type: average
-#     sql: ${month_value}
-#     value_format_name: usd
-# 
-#   - measure: average_month_visits
-#     type: average
-#     sql: ${month_visits}
-#     value_format_name: decimal_2
-    
+
+
 #THIS MONTH
   - measure: average_month_active_customer_value
     description: This is the average spend THIS month of active customers who were also active last month.
@@ -71,6 +63,7 @@
     filters:
       customer_facts.returned: yes
       spent_last_month: yes    
+    drill_fields: detail*
 
   - measure: total_month_active_customer_value
     description: This is the total spend THIS month of active customers who were also active last month.
@@ -80,6 +73,7 @@
     filters:
       customer_facts.returned: yes
       spent_last_month: yes   
+    drill_fields: detail*
 
 #LAST MONTH
   - measure: average_last_month_active_customer_value
@@ -90,6 +84,7 @@
     filters:
       customer_facts.returned: yes
       spent_last_month: yes    
+    drill_fields: detail*
 
   - measure: total_last_month_active_customer_value
     description: This is the total spend LAST month of active customers who were also active last month.
@@ -99,6 +94,7 @@
     filters:
       customer_facts.returned: yes
       spent_last_month: yes    
+    drill_fields: detail*
       
   - measure: total_churn
     description: This is the churn. In short, it is the DECREASE in the amount of money your active repeat customers are spending month to month.
@@ -115,8 +111,10 @@
     
   sets:
     detail:
-      - name
+      - customer_facts.user_id
       - visit_month
       - month_visits
       - month_value
+      - customer_last_month.month_visits
+      - customer_last_month.month_value
 
