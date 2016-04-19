@@ -140,6 +140,7 @@
   sets:
     detail:
       - user_id
+      - rank
       - lifetime_visits
       - lifetime_value
       - first_visit_time
