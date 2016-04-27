@@ -29,4 +29,4 @@
     - measure: selected_card
       type: count
       html: |
-        <p> 7♠ </p>
+        <p> 6♠ </p>
