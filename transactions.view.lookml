@@ -1,164 +1,118 @@
 - view: transactions
+  sql_table_name: transactions
+  extends: transactions_raw
   fields:
-
-  - dimension: id
-    primary_key: true
-    type: string
-    sql: ${TABLE}.`Transaction ID`
-
-  - dimension: card__keyed
-    hidden: true
+  
+  - dimension: sale_amount
+    description: This is the gross sales on this credit card swipe.
     type: number
-    sql: ${TABLE}.`Card - Keyed`
+    sql: ${gross_sales}
+    value_format_name: usd
 
-  - dimension: card__swiped
-    hidden: true
+  - dimension: service
+    description: Description of the service paid for.
+    sql: ${description}
+    
+  - dimension: tip_amount
+    description: How much tip was given (on the card) for this service.
     type: number
-    sql: ${TABLE}.`Card - Swiped`
+    sql: ${tip}
+    value_format_name: usd
 
-  - dimension: card_brand
-    hidden: true
-    type: string
-    sql: ${TABLE}.`Card Brand`
-
-  - dimension: cash
-    hidden: true
-    type: number
-    sql: ${TABLE}.Cash
-
-  - dimension_group: datetime
-    hidden: true
+  - dimension_group: created
+    description: This is the date of the appointment
     type: time
-    timeframes: [raw,time, date, week, month,quarter,year,day_of_week]
-    sql: ${TABLE}.Datetime
-
-  - dimension: description
+#     timeframes: [raw,time, date, week, month,quarter,year,day_of_week]
+    sql: ${datetime_raw}
+  
+  - dimension: is_weekend
+    description: Was this appointment on a weekend (Saturday, Sunday).
+    type: yesno
+    sql: ${created_day_of_week}  IN ('Saturday', 'Sunday')
+  
+  - dimension: is_before_today_month
+    label: Is Before Today (by Month)
+    description: This just splits every month into days that occured before today or after. 
+    type: yesno
+    sql: ${created_day_of_month} <= DAYOFMONTH(CURDATE())
+    
+  - dimension: user_id
     hidden: true
+    sql: md5(CONCAT(${card_brand} , ${pan_suffix}))
+    
+  - dimension: staff_name
+    description: Who gave the service.
     type: string
-    sql: ${TABLE}.Description
-
-  - dimension: details
-    hidden: true
-    type: string
-    sql: ${TABLE}.Details
-
-  - dimension: device_name
-    hidden: true
-    type: string
-    sql: ${TABLE}.`Device Name`
-
-  - dimension: dining_option
-    hidden: true
-    type: string
-    sql: ${TABLE}.`Dining Option`
-
-  - dimension: discounts
-    hidden: true
+    sql: ${TABLE}.`Staff Name`   
+    
+  - dimension: appointment_sequence_number
+    description: This is what number appointment this was for this customer.
     type: number
-    sql: ${TABLE}.Discounts
+    sql: |
+       (
+        SELECT COUNT(*)
+        FROM transactions t
+        WHERE t.Datetime <= ${created_raw}
+          AND md5(CONCAT(t.`Card Brand`, t.`PAN Suffix`)) = ${user_id}
+        )
+        
+  - dimension: is_first_appointment
+    description: This is yes if this is the person's first visit
+    type: yesno
+    sql: ${appointment_sequence_number} = 1
 
-  - dimension: event_type
-    hidden: true
-    type: string
-    sql: ${TABLE}.`Event Type`
+  - measure: total_revenue
+    description: This is sum of all the sales revenue.
+    type: sum
+    sql: ${sale_amount}
+    value_format_name: usd
+    drill_fields: detail*
 
-  - dimension: fees
-    hidden: true
+  - measure: count
+    description: This is the total number of transactions.
+    type: count
+    drill_fields: detail*
+    
+  - measure: count_repeat_appointments
+    description: This is the total number appointments that are not first appointments. 
+    type: count
+    filters: 
+      is_first_appointment: no
+    drill_fields: detail*
+  
+  - measure: percent_repeat_appointments
+    description: This is the percent ofappointments that are not first appointments. 
     type: number
-    sql: ${TABLE}.Fees
+    sql: 1.0 * ${count_repeat_appointments} / NULLIF(${count},0)
+    value_format_name: percent_2
 
-  - dimension: gift_card_sales
-    hidden: true
+  - measure: total_tips
+    description: The total tip on the services.
+    type: sum
+    sql: ${tip_amount}
+    value_format_name: usd
+    drill_fields: detail*
+
+  - measure: average_tips
+    description: The average tip on the services.
+    type: average
+    sql: ${tip_amount}
+    value_format_name: usd
+    drill_fields: detail*
+    
+  - measure: tip_percentage
+    description: The percent tip on the services.
     type: number
-    sql: ${TABLE}.`Gift Card Sales`
+    sql: 1.0 * ${total_tips} / NULLIF(${total_revenue},0)
+    value_format_name: percent_2
 
-  - dimension: gross_sales
-    hidden: true
-    type: number
-    sql: ${TABLE}.`Gross Sales`
-
-  - dimension: location
-    hidden: true
-    type: string
-    sql: ${TABLE}.Location
-
-  - dimension: net_sales
-    hidden: true
-    type: number
-    sql: ${TABLE}.`Net Sales`
-
-  - dimension: net_total
-    hidden: true
-    type: number
-    sql: ${TABLE}.`Net Total`
-
-  - dimension: other_tender
-    hidden: true
-    type: number
-    sql: ${TABLE}.`Other Tender`
-
-  - dimension: other_tender_note
-    hidden: true
-    type: string
-    sql: ${TABLE}.`Other Tender Note`
-
-  - dimension: other_tender_type
-    hidden: true
-    type: string
-    sql: ${TABLE}.`Other Tender Type`
-
-  - dimension: pan_suffix
-    hidden: true
-    type: string
-    sql: ${TABLE}.`PAN Suffix`
-
-  - dimension: partial_refunds
-    hidden: true
-    type: number
-    sql: ${TABLE}.`Partial Refunds`
-
-  - dimension: payment_id
-    hidden: true
-    type: string
-    sql: ${TABLE}.`Payment ID`
-
-  - dimension: square_gift_card
-    hidden: true
-    type: number
-    sql: ${TABLE}.`Square Gift Card`
-
-  - dimension: staff_id
-    hidden: true
-    type: string
-    sql: ${TABLE}.`Staff ID`
-
-#   - dimension: staff_name
-#     type: string
-#     sql: ${TABLE}.`Staff Name`
-
-  - dimension: tax
-    hidden: true
-    type: number
-    hidden: true
-    sql: ${TABLE}.Tax
-
-  - dimension: time_zone
-    type: string
-    hidden: true
-    sql: ${TABLE}.`Time Zone`
-
-  - dimension: tip
-    type: number
-    hidden: true
-    sql: ${TABLE}.Tip
-
-  - dimension: total_collected
-    type: number
-    hidden: true
-    sql: ${TABLE}.`Total Collected`
-
-  - dimension: wallet
-    type: number
-    hidden: true
-    sql: ${TABLE}.Wallet
+  sets:
+    detail:
+    - id
+    - staff_name
+    - customer_facts.user_id
+    - created_time
+    - total_revenue
+    - total_tips
+    - description
 

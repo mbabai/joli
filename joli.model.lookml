@@ -3,21 +3,21 @@
 - include: "*.view.lookml"       # include all the views
 - include: "*.dashboard.lookml"  # include all the dashboards
 
-- explore: appointments
-  label: Joli Client & Appointment Information
+- explore: transactions
+  label: Joli Client & Transaction Information
   persist_for: 0 minutes
   joins:
     - join: customer_facts
       view_label: Customer
       relationship: many_to_one
-      sql_on: ${appointments.user_id} = ${customer_facts.user_id}
+      sql_on: ${transactions.user_id} = ${customer_facts.user_id}
       
     - join: customer_monthly_facts
       view_label: Customer Facts By Month
       relationship: many_to_one
       sql_on: |
-        ${appointments.created_month} = ${customer_monthly_facts.visit_month} 
-        AND ${appointments.user_id} = ${customer_monthly_facts.user_id}
+        ${transactions.created_month} = ${customer_monthly_facts.visit_month} 
+        AND ${transactions.user_id} = ${customer_monthly_facts.user_id}
 
     - join: customer_last_month
       from: customer_monthly_facts
