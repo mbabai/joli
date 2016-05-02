@@ -112,7 +112,8 @@
     - staff_name
     - customer_facts.user_id
     - created_time
+    - description
     - total_revenue
     - total_tips
-    - description
+    - tip_percentage
 

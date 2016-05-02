@@ -1,10 +1,7 @@
 - explore: magic
   persist_for: 0 seconds
   hidden: true
-#         ♠
-#         ♡
-#         ♢
-#         ♣  
+#         ♠ ♡ ♢ ♣  
 - view: magic
   derived_table:
     sql: |
@@ -12,13 +9,7 @@
 
 
   fields:
-  
     - filter: audience_name
-      
-#     - dimension: selected
-#       type: time
-#       timeframes: [raw,date]
-#       sql: NOW()
     
     - dimension: selected_card_raw
       hidden: true
@@ -29,4 +20,4 @@
     - measure: selected_card
       type: count
       html: |
-        <p> 6♠ </p>
+        <p> 9♡ </p>
