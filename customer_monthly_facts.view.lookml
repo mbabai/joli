@@ -2,8 +2,8 @@
   derived_table:
     sql: |
       SELECT 
-        DATE_FORMAT(a.Datetime,'%Y-%m') AS visit_month
-        , DATE_FORMAT(a.Datetime - INTERVAL 1 MONTH,'%Y-%m') as last_month
+        DATE(DATE_FORMAT(a.Datetime, '%Y-%m-01')) AS visit_month
+        , DATE(DATE_FORMAT(DATE_FORMAT(a.Datetime - INTERVAL 1 MONTH,'%Y-%m'),'%Y-%m-01')) as last_month
         , md5(CONCAT((a.`Card Brand`) , (a.`PAN Suffix`))) AS user_id
         , COUNT(*) AS month_visits
         , COALESCE(SUM((a.`Gross Sales`)),0) AS month_value
@@ -20,14 +20,20 @@
     type: string
     sql: ${TABLE}.user_id
 
-  - dimension: visit_month
-    description: This is the month that these facts are referring to.
-    type: string
+#   - dimension: visit_month
+#     description: This is the month that these facts are referring to.
+#     type: string
+#     sql: ${TABLE}.visit_month
+    
+  - dimension: visit
+    type: time
+    timeframes: [month]
     sql: ${TABLE}.visit_month
     
-  - dimension: last_month
+  - dimension: last
     hidden: true
-    type: string
+    type: time
+    timeframes: [month]
     sql: ${TABLE}.last_month
     
   - dimension: prim_key
@@ -112,7 +118,7 @@
     type: number
     sql: 1.0 * ${total_churn} / NULLIF(${total_last_month_active_customer_value},0)
     value_format_name: percent_2
-  
+    
   sets:
     detail:
       - customer_facts.user_id
