@@ -3,7 +3,7 @@
     sql: |
       SELECT 
         DATE(DATE_FORMAT(a.Datetime, '%Y-%m-01')) AS visit_month
-        , DATE(DATE_FORMAT(DATE_FORMAT(a.Datetime - INTERVAL 1 MONTH,'%Y-%m'),'%Y-%m-01')) as last_month
+        , DATE(DATE_FORMAT(a.Datetime - INTERVAL 1 MONTH,'%Y-%m-01')) as last_month
         , md5(CONCAT((a.`Card Brand`) , (a.`PAN Suffix`))) AS user_id
         , COUNT(*) AS month_visits
         , COALESCE(SUM((a.`Gross Sales`)),0) AS month_value
