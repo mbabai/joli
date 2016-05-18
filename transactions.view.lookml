@@ -10,9 +10,34 @@
     value_format_name: usd
 
   - dimension: service
+    label: Service (details)
     description: Description of the service paid for.
     sql: ${description}
     
+  - dimension: service_category
+    label: Service (category)
+    description: Category of the service paid for.
+    drill_fields: [service]
+    type: string
+    sql_case:
+      'Approachable Perfection': ${service} like '%Approachable Perfection%'
+      'Blowout': ${service} like '%Blowout%'
+      'The Perfect Set': ${service} like '%The Perfect Set%'
+      'Classic Coif': ${service} like '%Classic Coif%'
+      'Bridal Trial': ${service} like '%Bridal Trial%'
+      'Halloween Makeup': ${service} like '%Halloween%'
+      'Four Blowouts Package': ${service} like '%Four Blowouts%'
+      'Updo/Braid': ${service} like '%Braid%' or ${service} like '%Updo%'
+      'Only Have Eyes For You': ${service} like '%Only Have Eyes For You%'
+      'Lashes': ${service} like '%Lash%'
+      'Custom Amount': ${service} like '%Custom Amount%'
+      'Keratin': ${service} like '%Keratin%'
+      'Brows': ${service} like '%Brow%'
+      'Touchup': ${service} like '%Touchup%'
+      'Hair cut': ${service} like '%Cut%'
+      'The Zsuzs': ${service} like '%Zsuzs%' or ${service} like '%Zshoosh%'
+      else: 'Product'
+
   - dimension: tip_amount
     description: How much tip was given (on the card) for this service.
     type: number
@@ -105,6 +130,12 @@
     type: number
     sql: 1.0 * ${total_tips} / NULLIF(${total_revenue},0)
     value_format_name: percent_2
+    
+  - measure: average_revenue
+    type: average
+    description: Average revenue per transaction.
+    sql: ${sale_amount}
+    value_format_name: usd
 
   sets:
     detail:
