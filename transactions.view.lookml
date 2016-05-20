@@ -30,12 +30,12 @@
       'Updo/Braid': ${service} like '%Braid%' or ${service} like '%Updo%'
       'Only Have Eyes For You': ${service} like '%Only Have Eyes For You%'
       'Lashes': ${service} like '%Lash%'
-      'Custom Amount': ${service} like '%Custom Amount%'
       'Keratin': ${service} like '%Keratin%'
       'Brows': ${service} like '%Brow%'
       'Touchup': ${service} like '%Touchup%'
       'Hair cut': ${service} like '%Cut%'
       'The Zsuzs': ${service} like '%Zsuzs%' or ${service} like '%Zshoosh%'
+      'Custom Amount': ${service} like '%Custom Amount%'
       else: 'Product'
 
   - dimension: tip_amount
