@@ -21,12 +21,12 @@
     type: string
     sql_case:
       'Approachable Perfection': ${service} like '%Approachable Perfection%'
+      'Blowouts Package': ${service} like '%Blowouts%'
       'Blowout': ${service} like '%Blowout%'
       'The Perfect Set': ${service} like '%The Perfect Set%'
       'Classic Coif': ${service} like '%Classic Coif%'
       'Bridal Trial': ${service} like '%Bridal Trial%'
       'Halloween Makeup': ${service} like '%Halloween%'
-      'Four Blowouts Package': ${service} like '%Four Blowouts%'
       'Updo/Braid': ${service} like '%Braid%' or ${service} like '%Updo%'
       'Only Have Eyes For You': ${service} like '%Only Have Eyes For You%'
       'Lashes': ${service} like '%Lash%'
