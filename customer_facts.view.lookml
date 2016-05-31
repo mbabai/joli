@@ -85,6 +85,11 @@
     type: count
     drill_fields: detail*
     
+  - measure: average_days_as_customer
+    type: average
+    description: This is the average number of days these customers have been custoemrs.
+    sql: ${days_as_customer}
+    
   - measure: count_active_customers
     description: This is the total number of customers who have come in the past 30 days
     type: count
