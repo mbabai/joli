@@ -11,7 +11,8 @@
       
       GROUP BY 1,2,3
       ORDER BY 1,2
-    sql_trigger_value: SELECT MAX(datetime) from transactions
+    persist_for: 5 minutes
+#     sql_trigger_value: SELECT MAX(datetime) from transactions
     indexes: [user_id]
 
   fields:
