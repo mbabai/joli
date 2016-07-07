@@ -28,7 +28,7 @@
     type: string
     sql: ${TABLE}.user_id
     html: |
-      User Lookup
+      Customer Lookup
     links:
     - label: Customer Lookup Dashboard
       url: /dashboards/2?User ID={{ value }}
