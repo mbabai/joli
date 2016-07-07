@@ -30,7 +30,7 @@
     html: |
       User Lookup
     links:
-    - label: User Dashboard
+    - label: Customer Lookup Dashboard
       url: /dashboards/2?User ID={{ value }}
 
   - dimension: lifetime_visits
