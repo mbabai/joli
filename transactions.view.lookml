@@ -21,7 +21,7 @@
     type: string
     sql_case:
       'Approachable Perfection': ${service} like '%Approachable Perfection%'
-      'Blowouts Package': ${service} like '%Blowouts%'
+      'Package': ${service}  like '%Unlimited%' OR ${service} like '%Month%'
       'Blowout': ${service} like '%Blowout%'
       'The Perfect Set': ${service} like '%The Perfect Set%'
       'Classic Coif': ${service} like '%Classic Coif%'

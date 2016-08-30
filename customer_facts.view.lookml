@@ -11,15 +11,16 @@
           , COALESCE(SUM((a.`Gross Sales`)),0) AS lifetime_value
           , MIN(a.Datetime) AS first_visit
           , MAX(a.Datetime) AS last_visit
-          , MAX(CASE WHEN a.Description like '%package%' THEN a.DATETIME ELSE NULL END) as most_recent_package_date
+          , MAX(CASE WHEN a.Description like '%Unlimited%' OR a.Description like '%Month%' 
+            THEN a.DATETIME ELSE NULL END) as most_recent_package_date
         
         FROM transactions AS a
         GROUP BY 1
         ORDER BY lifetime_value DESC)  a
         , (SELECT @curRank := 0) r
-    persist_for: 5 minutes
+#     persist_for: 5 minutes
 #     sql_trigger_value: SELECT MAX(datetime) from transactions
-    indexes: [user_id]
+#     indexes: [user_id]
 
   fields:
   - dimension: user_id
@@ -66,7 +67,7 @@
   - dimension: days_since_package_purchase
     description: How long ago (in days) did this customer buy the last package.
     type: number
-    sql: datediff(${most_recent_package_raw}, CURDATE())
+    sql: datediff(CURDATE(), ${most_recent_package_raw})
     
   - dimension: days_remaining_in_package
     description: How long (in days) before this customer runs out of their last package.
