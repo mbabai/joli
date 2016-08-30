@@ -11,6 +11,7 @@
           , COALESCE(SUM((a.`Gross Sales`)),0) AS lifetime_value
           , MIN(a.Datetime) AS first_visit
           , MAX(a.Datetime) AS last_visit
+          , MAX(CASE WHEN a.Description like '%package%' THEN a.DATETIME ELSE NULL END) as most_recent_package_date
         
         FROM transactions AS a
         GROUP BY 1
@@ -56,6 +57,27 @@
     timeframes: [raw, time, date, week, month]
     sql: ${TABLE}.last_visit
     
+  - dimension_group: most_recent_package
+    description: This is the time of this customer last bought a package.
+    type: time
+    timeframes: [raw, time, date, week, month]
+    sql: ${TABLE}.most_recent_package_date
+  
+  - dimension: days_since_package_purchase
+    description: How long ago (in days) did this customer buy the last package.
+    type: number
+    sql: datediff(${most_recent_package_raw}, CURDATE())
+    
+  - dimension: days_remaining_in_package
+    description: How long (in days) before this customer runs out of their last package.
+    type: number
+    sql: 30 - ${days_since_package_purchase}
+    
+  - dimension: has_package
+    description: Does this customer currently have an active package
+    type: yesno
+    sql: ${days_remaining_in_package} > 0
+    
   - dimension: rank
     description: This is how valuable this customer is as a rank (#1 is the most valuable customer).
     type: number
@@ -96,6 +118,13 @@
     type: count
     filters:
       is_active: yes
+    drill_fields: detail*
+
+  - measure: count_package_customers
+    description: This is the total number of customers who have an active package.
+    type: count
+    filters:
+      has_package: yes
     drill_fields: detail*
       
   - measure: average_lifetime_value
