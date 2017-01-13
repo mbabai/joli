@@ -11,20 +11,18 @@
 
 - view: magic
   derived_table:
+    sql_trigger_value: SELECT 1
+    indexes: [selected_card]
     sql: |
-      SELECT 'your card' as selected_card
+      SELECT 'your card' as selected_card, 'your name' as audience_name
 
 
   fields:
     - filter: audience_name
-    
-    - dimension: selected_card_raw
-      hidden: true
+
+    - dimension: selected_card
       sql: ${TABLE}.selected_card
-
-
-
-    - measure: selected_card
-      type: count
       html: |
-        <p> 9♡ </p>
+          <p> 9♡ </p>
+
+
