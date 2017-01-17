@@ -1,7 +1,6 @@
 - explore: magic
   persist_for: 0 seconds
   hidden: true
-#         ♠ ♡ ♢ ♣  
 # ETL "in a flash"
 # fire -> redshift
 # Combustion takes oxygen and any hydrocarbon. 
@@ -23,6 +22,6 @@
     - dimension: selected_card
       sql: ${TABLE}.selected_card
       html: |
-          <p> 9♡ </p>
+          <p> 9 </p>
 
 
