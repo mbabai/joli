@@ -1,9 +1,7 @@
 connection: "marcell_ql"
-
 #78bbea #this is the Joli Blue
 # include all the views
 include: "*.view"
-
 # include all the dashboards
 include: "*.dashboard"
 
