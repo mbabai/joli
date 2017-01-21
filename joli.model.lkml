@@ -4,7 +4,6 @@ connection: "joli_bq"
 include: "*.view"
 # include all the dashboards
 include: "*.dashboard"
-
 explore: transactions {
   label: "Joli Client & Transaction Information"
   persist_for: "0 minutes"
