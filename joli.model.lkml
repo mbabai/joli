@@ -1,4 +1,4 @@
-connection: "marcell_ql"
+connection: "joli_bq"
 #78bbea #this is the Joli Blue
 # include all the views
 include: "*.view"
