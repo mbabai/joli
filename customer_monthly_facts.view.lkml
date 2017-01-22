@@ -13,7 +13,6 @@ view: customer_monthly_facts {
        ;;
     persist_for: "5 minutes"
     #     sql_trigger_value: SELECT MAX(datetime) from transactions
-    indexes: ["user_id"]
   }
 
   dimension: user_id {

@@ -14,7 +14,6 @@ explore: magic {
 view: magic {
   derived_table: {
     sql_trigger_value: SELECT 1 ;;
-    indexes: ["selected_card"]
     sql: SELECT 'your card' as selected_card, 'your name' as audience_name
       ;;
   }
