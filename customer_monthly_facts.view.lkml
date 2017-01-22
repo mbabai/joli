@@ -11,7 +11,7 @@ view: customer_monthly_facts {
       GROUP BY 1,2,3
       ORDER BY 1,2
        ;;
-    persist_for: "5 minutes"
+#     persist_for: "5 minutes"
     #     sql_trigger_value: SELECT MAX(datetime) from transactions
   }
 
