@@ -1,26 +1,22 @@
 view: customer_facts {
   derived_table: {
-    sql: SELECT *
-      , @curRank := @curRank + 1 AS rank
-      FROM
-        (SELECT
-          md5(CONCAT((a.`Card Brand`) , (a.`PAN Suffix`))) AS user_id
+    sql: SELECT
+          md5(CONCAT(a.card_brand , CAST(a.pan_suffix as STRING))) AS user_id
           , COUNT(*) AS lifetime_visits
-          , COALESCE(SUM((a.`Gross Sales`)),0) AS lifetime_value
-          , MIN(a.Datetime) AS first_visit
-          , MAX(a.Datetime) AS last_visit
-          , MAX(CASE WHEN a.Description like '%Unlimited%' OR a.Description like '%Month%'
-            THEN a.DATETIME ELSE NULL END) as most_recent_package_date
+          , COALESCE(SUM(a.gross_sales),0) AS lifetime_value
+          , TIMESTAMP(CAST(MIN(a.Datetime) as STRING)) AS first_visit
+          , TIMESTAMP(CAST(MAX(a.Datetime) as STRING)) AS last_visit
+          , MAX(CASE WHEN a.description like '%Unlimited%' OR a.description like '%Month%'
+            THEN a.datetime ELSE NULL END) as most_recent_package_date
+          , RANK() OVER(ORDER BY COALESCE(SUM(a.gross_sales),0) DESC) AS rank
 
-        FROM transactions AS a
+        FROM `melodic-bearing-149516.joli.square_transactions_raw` AS a
         GROUP BY 1
-        ORDER BY lifetime_value DESC)  a
-        , (SELECT @curRank := 0) r
-       ;;
+        ORDER BY lifetime_value DESC
+;;
   }
 
   dimension: user_id {
-    #X# Invalid LookML inside "dimension": {"label":null}
     description: "This is a random number based on the credit card used to identify a person."
     primary_key: yes
     type: string
@@ -71,7 +67,7 @@ view: customer_facts {
   dimension: days_since_package_purchase {
     description: "How long ago (in days) did this customer buy the last package."
     type: number
-    sql: datediff(CURDATE(), ${most_recent_package_raw}) ;;
+    sql: date_diff(CURRENT_DATE(), ${most_recent_package_date},DAY) ;;
   }
 
   dimension: days_remaining_in_package {
@@ -96,13 +92,13 @@ view: customer_facts {
   dimension: days_as_customer {
     description: "This is the number of days between the first and last visit of the customer."
     type: number
-    sql: datediff(${last_visit_raw}, ${first_visit_raw}) ;;
+    sql: date_diff(${last_visit_date}, ${first_visit_date},DAY) ;;
   }
 
   dimension: is_recent {
     description: "Did this person come in within the past 30 days?"
     type: yesno
-    sql: datediff(CURDATE(), ${last_visit_raw}) < 30 ;;
+    sql: date_diff(CURRENT_DATE(), ${last_visit_date}, DAY) < 30 ;;
   }
 
   dimension: returned {

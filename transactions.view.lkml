@@ -1,7 +1,11 @@
-include: "transactions_raw.view.lkml"
+include: "square_transactions_raw.view.lkml"
 view: transactions {
-  sql_table_name: transactions ;;
-  extends: [transactions_raw]
+  extends: [square_transactions_raw]
+
+  dimension: id {
+    type:  string
+    sql: ${transaction_id} ;;
+  }
 
   dimension: sale_amount {
     description: "This is the gross sales on this credit card swipe."
@@ -118,7 +122,7 @@ view: transactions {
     description: "This is the date of the appointment"
     type: time
     #     timeframes: [raw,time, date, week, month,quarter,year,day_of_week]
-    sql: ${datetime_raw} ;;
+    sql: TIMESTAMP(CAST(${datetime_raw} as STRING));;
   }
 
   dimension: is_weekend {
@@ -136,7 +140,7 @@ view: transactions {
 
   dimension: user_id {
     hidden: yes
-    sql: md5(CONCAT(${card_brand} , ${pan_suffix})) ;;
+    sql: md5(CONCAT(${card_brand} , CAST(${pan_suffix} as string))) ;;
   }
 
   dimension: staff_name {
