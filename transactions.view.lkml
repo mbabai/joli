@@ -27,7 +27,7 @@ view: transactions {
   dimension: id {
     primary_key: yes
     type: string
-    sql: ${TABLE}.transaction_id ;;
+    sql: ${TABLE}.id ;;
   }
 
   dimension: user_id {
