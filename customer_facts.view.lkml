@@ -1,7 +1,7 @@
 view: customer_facts {
   derived_table: {
     sql: SELECT
-          md5(CONCAT(a.card_brand , CAST(a.pan_suffix as STRING))) AS user_id
+          CAST(FARM_FINGERPRINT(CONCAT(a.card_brand , CAST(a.pan_suffix as STRING))) as STRING) AS user_id
           , COUNT(*) AS lifetime_visits
           , COALESCE(SUM(a.gross_sales),0) AS lifetime_value
           , TIMESTAMP(CAST(MIN(a.Datetime) as STRING)) AS first_visit
