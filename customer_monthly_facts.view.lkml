@@ -177,7 +177,7 @@ view: customer_monthly_facts {
 
   set: detail {
     fields: [
-      customer_facts.user_id,
+      transactions.user_id,
       visit_month,
       month_visits,
       month_value,
