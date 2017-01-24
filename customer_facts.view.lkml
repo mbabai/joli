@@ -196,7 +196,7 @@ view: customer_facts {
 
   set: detail {
     fields: [
-      user_id,
+      transactions.user_id,
       rank,
       lifetime_visits,
       lifetime_value,

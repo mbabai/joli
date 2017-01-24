@@ -284,7 +284,7 @@ view: transactions {
     fields: [
       id,
       staff_name,
-      customer_facts.user_id,
+      user_id,
       created_time,
       service,
       total_revenue,
