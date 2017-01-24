@@ -17,6 +17,7 @@ view: customer_facts {
   }
 
   dimension: user_id {
+    primary_key: yes
     hidden: yes
   }
 
@@ -57,7 +58,7 @@ view: customer_facts {
   dimension: days_since_package_purchase {
     description: "How long ago (in days) did this customer buy the last package."
     type: number
-    sql: timestamp_diffCURRENT_TIMESTAMP(), ${most_recent_package_raw},DAY) ;;
+    sql: timestamp_diff(CURRENT_TIMESTAMP(), ${most_recent_package_raw},DAY) ;;
   }
 
   dimension: days_remaining_in_package {
@@ -88,7 +89,7 @@ view: customer_facts {
   dimension: is_recent {
     description: "Did this person come in within the past 30 days?"
     type: yesno
-    sql: CURRENT_TIMESTAMP()(CURRENT_TIMESTAMP(), ${last_visit_raw}, DAY) < 30 ;;
+    sql: timestamp_diff(CURRENT_TIMESTAMP(), ${last_visit_raw}, DAY) < 30 ;;
   }
 
   dimension: returned {
