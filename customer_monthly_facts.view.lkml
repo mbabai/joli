@@ -1,13 +1,13 @@
 view: customer_monthly_facts {
   derived_table: {
     sql: SELECT
-      CAST(FORMAT_DATE('%Y-%m-01', DATE(TIMESTAMP(CAST(a.datetime as STRING)))) as TIMESTAMP) AS visit_month
-      , CAST(DATE_ADD(CAST(FORMAT_DATE('%Y-%m-01', DATE(TIMESTAMP(CAST(a.datetime as STRING)))) as DATE), INTERVAL -1 MONTH) as TIMESTAMP) as last_month
-      , CAST(FARM_FINGERPRINT(CONCAT(a.card_brand , CAST(a.pan_suffix as STRING))) as STRING) AS user_id
+      CAST(FORMAT_DATE('%Y-%m-01', DATE(a.created_at)) as TIMESTAMP) AS visit_month
+      , CAST(DATE_ADD(CAST(FORMAT_DATE('%Y-%m-01', DATE(a.created_at)) as DATE), INTERVAL -1 MONTH) as TIMESTAMP) as last_month
+      , user_id
       , COUNT(*) AS month_visits
-      , COALESCE(SUM(a.gross_sales),0) AS month_value
+      , COALESCE(SUM(a.item_price),0) AS month_value
 
-    FROM `melodic-bearing-149516.joli.square_transactions_raw` AS a
+    FROM ${transactions.SQL_TABLE_NAME} AS a
     GROUP BY 1,2,3
        ;;
 #     persist_for: "5 minutes"

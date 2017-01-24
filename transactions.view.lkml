@@ -21,19 +21,25 @@ view: transactions {
               , staff_name
             FROM `melodic-bearing-149516.joli.square_transactions_raw` AS t
             ) a
-        limit 100
        ;;
   }
 #DIMENSIONS
   dimension: id {
+    primary_key: yes
     type: string
     sql: ${TABLE}.transaction_id ;;
   }
 
   dimension: user_id {
     view_label: "Customer"
-    type: string
+    description: "This is a random number based on the credit card used to identify a person."
     sql: ${TABLE}.user_id ;;
+    type: string
+    html: Customer Lookup;;
+    link: {
+      label: "Customer Lookup Dashboard"
+      url: "/dashboards/2?User ID={{ value }}"
+    }
   }
 
   dimension_group: created {

@@ -1,33 +1,23 @@
 view: customer_facts {
+  view_label: "Customer"
   derived_table: {
     sql: SELECT
-          CAST(FARM_FINGERPRINT(CONCAT(a.card_brand , CAST(a.pan_suffix as STRING))) as STRING) AS user_id
+           user_id
           , COUNT(*) AS lifetime_visits
-          , COALESCE(SUM(a.gross_sales),0) AS lifetime_value
-          , TIMESTAMP(CAST(MIN(a.Datetime) as STRING)) AS first_visit
-          , TIMESTAMP(CAST(MAX(a.Datetime) as STRING)) AS last_visit
-          , MAX(CASE WHEN a.description like '%Unlimited%' OR a.description like '%Month%'
-            THEN a.datetime ELSE NULL END) as most_recent_package_date
-          , RANK() OVER(ORDER BY COALESCE(SUM(a.gross_sales),0) DESC) AS rank
-
-        FROM `melodic-bearing-149516.joli.square_transactions_raw` AS a
+          , COALESCE(SUM(a.item_price),0) AS lifetime_value
+          , MIN(a.created_at) AS first_visit
+          , MAX(a.created_at) AS last_visit
+          , MAX(CASE WHEN a.service like '%Unlimited%' OR a.service like '%Month%'
+            THEN a.created_at ELSE NULL END) as most_recent_package_at
+          , RANK() OVER(ORDER BY COALESCE(SUM(a.item_price),0) DESC) AS rank
+        FROM ${transactions.SQL_TABLE_NAME} AS a
         GROUP BY 1
         ORDER BY lifetime_value DESC
 ;;
   }
 
   dimension: user_id {
-    description: "This is a random number based on the credit card used to identify a person."
-    primary_key: yes
-    type: string
-    sql: ${TABLE}.user_id ;;
-    html: Customer Lookup
-      ;;
-
-    link: {
-      label: "Customer Lookup Dashboard"
-      url: "/dashboards/2?User ID={{ value }}"
-    }
+    hidden: yes
   }
 
   dimension: lifetime_visits {
@@ -61,13 +51,13 @@ view: customer_facts {
     description: "This is the time of this customer last bought a package."
     type: time
     timeframes: [raw, time, date, week, month]
-    sql: ${TABLE}.most_recent_package_date ;;
+    sql: ${TABLE}.most_recent_package_at ;;
   }
 
   dimension: days_since_package_purchase {
     description: "How long ago (in days) did this customer buy the last package."
     type: number
-    sql: date_diff(CURRENT_DATE(), ${most_recent_package_date},DAY) ;;
+    sql: timestamp_diffCURRENT_TIMESTAMP(), ${most_recent_package_raw},DAY) ;;
   }
 
   dimension: days_remaining_in_package {
@@ -92,13 +82,13 @@ view: customer_facts {
   dimension: days_as_customer {
     description: "This is the number of days between the first and last visit of the customer."
     type: number
-    sql: date_diff(${last_visit_date}, ${first_visit_date},DAY) ;;
+    sql: timestamp_diff(${last_visit_raw}, ${first_visit_raw},DAY) ;;
   }
 
   dimension: is_recent {
     description: "Did this person come in within the past 30 days?"
     type: yesno
-    sql: date_diff(CURRENT_DATE(), ${last_visit_date}, DAY) < 30 ;;
+    sql: CURRENT_TIMESTAMP()(CURRENT_TIMESTAMP(), ${last_visit_raw}, DAY) < 30 ;;
   }
 
   dimension: returned {
@@ -128,24 +118,20 @@ view: customer_facts {
   measure: count_active_customers {
     description: "This is the total number of customers who have come in the past 30 days"
     type: count
-
     filters: {
       field: is_active
       value: "yes"
     }
-
     drill_fields: [detail*]
   }
 
   measure: count_package_customers {
     description: "This is the total number of customers who have an active package."
     type: count
-
     filters: {
       field: has_package
       value: "yes"
     }
-
     drill_fields: [detail*]
   }
 
@@ -163,7 +149,6 @@ view: customer_facts {
     sql: ${lifetime_value} ;;
     drill_fields: [detail*]
     value_format_name: usd
-
     filters: {
       field: returned
       value: "yes"
@@ -194,12 +179,10 @@ view: customer_facts {
   measure: count_repeat_customers {
     description: "This is how many customers have come back for a second appointment."
     type: count
-
     filters: {
       field: returned
       value: "yes"
     }
-
     drill_fields: [detail*]
   }
 
