@@ -98,7 +98,7 @@ view: customer_facts {
     sql: ${lifetime_visits} > 1 ;;
   }
 
-  dimension: is_active {
+  dimension: is_engaged {
     description: "This person has come more than once AND at least once within the past 30 days"
     type: yesno
     sql: ${is_recent} and ${returned} ;;
@@ -120,7 +120,7 @@ view: customer_facts {
     description: "This is the total number of customers who have come in the past 30 days"
     type: count
     filters: {
-      field: is_active
+      field: is_engaged
       value: "yes"
     }
     drill_fields: [detail*]

@@ -123,6 +123,30 @@ view: customer_monthly_facts {
 #MEASURES:
 
   #AVERAGES
+  measure: average_month_engaged_customer_value {
+    group_label: "Averages"
+    description: "This is the average spend THIS month of active customers who were also active last month."
+    type: average
+    sql: ${month_value} ;;
+    value_format_name: usd
+    filters: {
+      field: spent_this_month
+      value: "yes"
+    }
+    filters: {
+      field: customer_facts.returned
+      value: "yes"
+    }
+    filters: {
+      field: is_first_month
+      value: "no"
+    }
+    drill_fields: [detail*]
+  }
+
+
+
+
   measure: average_month_active_customer_value {
     group_label: "Averages"
     description: "This is the average spend THIS month of active customers who were also active last month."
