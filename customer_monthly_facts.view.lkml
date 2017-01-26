@@ -217,6 +217,7 @@ view: customer_monthly_facts {
       field: spent_this_month
       value: "yes"
     }
+    drill_fields: [detail*]
   }
   measure: count_last_month_spending_users {
     group_label: "Counts"
@@ -226,7 +227,8 @@ view: customer_monthly_facts {
       field: spent_last_month
       value: "yes"
     }
-    }
+    drill_fields: [detail*]
+  }
 
   measure: count_repeat_users {
     group_label: "Counts"
@@ -240,6 +242,7 @@ view: customer_monthly_facts {
       field: spent_this_month
       value: "yes"
     }
+    drill_fields: [detail*]
   }
 
   measure: count_last_month_repeat_users {
@@ -254,6 +257,7 @@ view: customer_monthly_facts {
       field: spent_last_month
       value: "yes"
     }
+    drill_fields: [detail*]
   }
 
   set: detail {
