@@ -30,7 +30,7 @@ explore: customer_monthly_facts  {
   }
   join: customer_facts {
     view_label: "Customer all-time facts"
-    fields: [returned, rank]
+    fields: [returned, rank,first_visit_month]
     view_label: "Customer"
     relationship: many_to_one
     sql_on: ${customer_monthly_facts.user_id} = ${customer_facts.user_id} ;;

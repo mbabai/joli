@@ -42,16 +42,19 @@ view: customer_monthly_facts {
   }
 
   dimension: user_id {
-#     hidden: yes
     type: string
     sql: ${TABLE}.user_id ;;
   }
 
   dimension_group: visit {
-#     hidden:  yes
     type: time
-    timeframes: [month]
+    timeframes: [raw,month]
     sql: ${TABLE}.visit_month ;;
+  }
+
+  dimension: is_first_month {
+    type: yesno
+    sql: ${visit_month} = ${customer_facts.first_visit_month} ;;
   }
 
   dimension_group: last {
@@ -126,66 +129,116 @@ view: customer_monthly_facts {
     type: average
     sql: ${month_value} ;;
     value_format_name: usd
-
     filters: {
       field: customer_facts.returned
       value: "yes"
     }
-
     filters: {
-      field: spent_last_month
-      value: "yes"
+      field: is_first_month
+      value: "no"
     }
-
     drill_fields: [detail*]
   }
   measure: average_last_month_active_customer_value {
     group_label: "Averages"
-    description: "This is the average spend LAST month of active customers who were also active last month. (USE WITH CREATED MONTH)"
+    description: "This is the average spend LAST month of active customers."
     type: average
     sql: ${customer_last_month.month_value} ;;
     value_format_name: usd
-
     filters: {
       field: customer_facts.returned
       value: "yes"
     }
-
+    drill_fields: [detail*]
+  }
+  measure: average_month_active_customer_visits {
+    group_label: "Averages"
+    description: "This is the average number of visits THIS month of active customers who were also active in the past."
+    type: average
+    sql: ${month_visits} ;;
+    value_format_name:  decimal_2
     filters: {
-      field: spent_last_month
+      field: customer_facts.returned
       value: "yes"
     }
-
+    filters: {
+      field: is_first_month
+      value: "no"
+    }
+    drill_fields: [detail*]
+  }
+  measure: average_last_month_active_customer_visits {
+    group_label: "Averages"
+    description: "This is the average number of visits LAST month of active customers."
+    type: average
+    sql: ${customer_last_month.month_visits} ;;
+    value_format_name:  decimal_2
+    filters: {
+      field: customer_facts.returned
+      value: "yes"
+    }
+    filters: {
+      field: is_first_month
+      value: "no"
+    }
     drill_fields: [detail*]
   }
   #TOTALS
-  measure: total_month_active_customer_value {
+  measure: total_month_active_customer_visits {
     group_label: "Totals"
-    description: "This is the total spend THIS month of active customers who were also active last month.  (USE WITH CREATED MONTH)"
+    description: "This is the total number of visits THIS month of active customers who were also active in the past."
     type: sum
-    sql: ${month_value} ;;
-    value_format_name: usd
-
+    sql: ${month_visits} ;;
+    value_format_name:  decimal_2
     filters: {
       field: customer_facts.returned
       value: "yes"
     }
-
-#     filters: {
-#       field: spent_last_month
-#       value: "yes"
-#     }
-
+    filters: {
+      field: is_first_month
+      value: "no"
+    }
+    drill_fields: [detail*]
+  }
+  measure: total_last_month_active_customer_visits {
+    group_label: "Totals"
+    description: "This is the total number of visits LAST month of active customers."
+    type: sum
+    sql: ${customer_last_month.month_visits} ;;
+    value_format_name:  decimal_2
+    filters: {
+      field: customer_facts.returned
+      value: "yes"
+    }
+    filters: {
+      field: is_first_month
+      value: "no"
+    }
+    drill_fields: [detail*]
+  }
+  measure: total_month_active_customer_value {
+    group_label: "Totals"
+    description: "This is the total spend THIS month of active customers who were also active in the past."
+    type: sum
+    sql: ${month_value} ;;
+    value_format_name: usd
+    filters: {
+      field: customer_facts.returned
+      value: "yes"
+    }
+    filters: {
+      field: is_first_month
+      value: "no"
+    }
     drill_fields: [detail*]
   }
 
   measure: total_last_month_active_customer_value {
     group_label: "Totals"
-    description: "This is the total spend LAST month of active customers who were also active last month.  (USE WITH CREATED MONTH)"
+    description: "This is the total spend LAST month of active customers."
     type: sum
     sql: ${customer_last_month.month_value} ;;
     value_format_name: usd
-
     filters: {
       field: customer_facts.returned
       value: "yes"
@@ -195,7 +248,7 @@ view: customer_monthly_facts {
 
   measure: total_churn {
     group_label: "Totals"
-    description: "This is the churn. In short, it is the DECREASE in the amount of money your active repeat customers are spending month to month.  (USE WITH CREATED MONTH)"
+    description: "This is the churn. In short, it is the DECREASE in the amount of money your active repeat customers are spending month to month."
     type: number
     sql: ${total_last_month_active_customer_value} - ${total_month_active_customer_value} ;;
     value_format_name: usd
@@ -203,10 +256,17 @@ view: customer_monthly_facts {
 
   measure: total_churn_percentage {
     group_label: "Totals"
-    description: "This is the same as total churn, but as a percent of the previous month.  (USE WITH CREATED MONTH)"
+    description: "This is the same as total churn, but as a percent of the previous month."
     type: number
     sql: 1.0 * ${total_churn} / NULLIF(${total_last_month_active_customer_value},0) ;;
     value_format_name: percent_2
+  }
+
+  measure: count_new_users {
+    group_label: "Counts"
+    type:  count_distinct
+    sql:  ${user_id} ;;
+    filters: {field: is_first_month value: "yes"}
   }
 
   measure: count_spending_users {
@@ -262,10 +322,10 @@ view: customer_monthly_facts {
 
   set: detail {
     fields: [
-      transactions.user_id,
-      visit_month,
-      month_visits,
-      month_value,
+      customer_facts.user_id,
+      customer_facts.visit_month,
+      customer_facts.month_visits,
+      customer_facts.month_value,
       customer_last_month.month_visits,
       customer_last_month.month_value
     ]
