@@ -87,7 +87,7 @@ view: customer_facts {
   }
 
   dimension: is_recent {
-    description: "Did this person come in within the past 30 days?"
+    description: "Did this person have a transaction within the past 30 days?"
     type: yesno
     sql: timestamp_diff(CURRENT_TIMESTAMP(), ${last_visit_raw}, DAY) < 30 ;;
   }
@@ -99,7 +99,7 @@ view: customer_facts {
   }
 
   dimension: is_active {
-    description: "This person has come more than once AND within the past 30 days"
+    description: "This person has come more than once AND at least once within the past 30 days"
     type: yesno
     sql: ${is_recent} and ${returned} ;;
   }
@@ -112,7 +112,7 @@ view: customer_facts {
 
   measure: average_days_as_customer {
     type: average
-    description: "This is the average number of days these customers have been custoemrs."
+    description: "This is the average number of days between the first and last transaction this person had."
     sql: ${days_as_customer} ;;
   }
 

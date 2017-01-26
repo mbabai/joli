@@ -1,26 +1,54 @@
+view: month_user_cartesian_blast {
+  derived_table: {
+    sql: SELECT a.user_id as user_id
+          , b.visit_month as visit_month
+          , b.last_month as last_month
+        FROM
+          (SELECT DISTINCT t.user_id AS user_id
+          FROM ${transactions.SQL_TABLE_NAME} t
+        ) a
+        INNER JOIN
+          (SELECT DISTINCT CAST(FORMAT_TIMESTAMP('%Y-%m-01', t.created_at ) as TIMESTAMP) AS visit_month
+          , CAST(DATE_ADD(CAST(FORMAT_DATE('%Y-%m-01', DATE(t.created_at)) as DATE), INTERVAL -1 MONTH) as TIMESTAMP) as last_month
+          FROM ${transactions.SQL_TABLE_NAME} t
+        ) b ON 1=1
+        ORDER BY 2, 1
+        ;;
+  }
+}
+
+
+
 view: customer_monthly_facts {
   derived_table: {
-    sql: SELECT
-      CAST(FORMAT_DATE('%Y-%m-01', DATE(a.created_at)) as TIMESTAMP) AS visit_month
-      , CAST(DATE_ADD(CAST(FORMAT_DATE('%Y-%m-01', DATE(a.created_at)) as DATE), INTERVAL -1 MONTH) as TIMESTAMP) as last_month
-      , user_id
-      , COUNT(*) AS month_visits
-      , COALESCE(SUM(a.item_price),0) AS month_value
+    sql: SELECT mucb.visit_month as visit_month
+          , mucb.last_month as last_month
+          , mucb.user_id as user_id
+          , COALESCE(month_visits,0) as month_visits
+          , COALESCE(month_value,0) as month_value
+        FROM ${month_user_cartesian_blast.SQL_TABLE_NAME} mucb
+        LEFT JOIN (
+          SELECT
+            CAST(FORMAT_DATE('%Y-%m-01', DATE(a.created_at)) as TIMESTAMP) AS visit_month
+            , user_id
+            , COUNT(*) AS month_visits
+            , COALESCE(SUM(a.item_price),0) AS month_value
 
-    FROM ${transactions.SQL_TABLE_NAME} AS a
-    GROUP BY 1,2,3
+          FROM ${transactions.SQL_TABLE_NAME} AS a
+          GROUP BY 1,2) facts ON facts.user_id = mucb.user_id AND facts.visit_month = mucb.visit_month
        ;;
 #     persist_for: "5 minutes"
     #     sql_trigger_value: SELECT MAX(datetime) from transactions
   }
 
   dimension: user_id {
-    hidden: yes
+#     hidden: yes
     type: string
     sql: ${TABLE}.user_id ;;
   }
 
   dimension_group: visit {
+#     hidden:  yes
     type: time
     timeframes: [month]
     sql: ${TABLE}.visit_month ;;
@@ -53,10 +81,16 @@ view: customer_monthly_facts {
     value_format_name: usd
   }
 
+  dimension:  spent_this_month {
+    description: "Did this person spend money this month?"
+    type:  yesno
+    sql: ${month_value} > 0  ;;
+  }
+
   dimension: spent_last_month {
     description: "Did this person spend money the previous month?"
     type: yesno
-    sql: ${customer_last_month.month_value} > 0 ;;
+    sql: ${customer_last_month.spent_this_month} ;;
   }
 
   dimension: churn_category {
@@ -83,8 +117,11 @@ view: customer_monthly_facts {
     }
   }
 
-  #THIS MONTH
+#MEASURES:
+
+  #AVERAGES
   measure: average_month_active_customer_value {
+    group_label: "Averages"
     description: "This is the average spend THIS month of active customers who were also active last month."
     type: average
     sql: ${month_value} ;;
@@ -102,29 +139,9 @@ view: customer_monthly_facts {
 
     drill_fields: [detail*]
   }
-
-  measure: total_month_active_customer_value {
-    description: "This is the total spend THIS month of active customers who were also active last month."
-    type: sum
-    sql: ${month_value} ;;
-    value_format_name: usd
-
-    filters: {
-      field: customer_facts.returned
-      value: "yes"
-    }
-
-    filters: {
-      field: spent_last_month
-      value: "yes"
-    }
-
-    drill_fields: [detail*]
-  }
-
-  #LAST MONTH
   measure: average_last_month_active_customer_value {
-    description: "This is the average spend LAST month of active customers who were also active last month."
+    group_label: "Averages"
+    description: "This is the average spend LAST month of active customers who were also active last month. (USE WITH CREATED MONTH)"
     type: average
     sql: ${customer_last_month.month_value} ;;
     value_format_name: usd
@@ -141,9 +158,30 @@ view: customer_monthly_facts {
 
     drill_fields: [detail*]
   }
+  #TOTALS
+  measure: total_month_active_customer_value {
+    group_label: "Totals"
+    description: "This is the total spend THIS month of active customers who were also active last month.  (USE WITH CREATED MONTH)"
+    type: sum
+    sql: ${month_value} ;;
+    value_format_name: usd
+
+    filters: {
+      field: customer_facts.returned
+      value: "yes"
+    }
+
+#     filters: {
+#       field: spent_last_month
+#       value: "yes"
+#     }
+
+    drill_fields: [detail*]
+  }
 
   measure: total_last_month_active_customer_value {
-    description: "This is the total spend LAST month of active customers who were also active last month."
+    group_label: "Totals"
+    description: "This is the total spend LAST month of active customers who were also active last month.  (USE WITH CREATED MONTH)"
     type: sum
     sql: ${customer_last_month.month_value} ;;
     value_format_name: usd
@@ -152,27 +190,69 @@ view: customer_monthly_facts {
       field: customer_facts.returned
       value: "yes"
     }
-
-    filters: {
-      field: spent_last_month
-      value: "yes"
-    }
-
     drill_fields: [detail*]
   }
 
   measure: total_churn {
-    description: "This is the churn. In short, it is the DECREASE in the amount of money your active repeat customers are spending month to month."
+    group_label: "Totals"
+    description: "This is the churn. In short, it is the DECREASE in the amount of money your active repeat customers are spending month to month.  (USE WITH CREATED MONTH)"
     type: number
     sql: ${total_last_month_active_customer_value} - ${total_month_active_customer_value} ;;
     value_format_name: usd
   }
 
   measure: total_churn_percentage {
-    description: "This is the same as total churn, but as a percent of the previous month."
+    description: "This is the same as total churn, but as a percent of the previous month.  (USE WITH CREATED MONTH)"
     type: number
     sql: 1.0 * ${total_churn} / NULLIF(${total_last_month_active_customer_value},0) ;;
     value_format_name: percent_2
+  }
+
+  measure: count_spending_users {
+    group_label: "Counts"
+    type:  count_distinct
+    sql:  ${user_id} ;;
+    filters: {
+      field: spent_this_month
+      value: "yes"
+    }
+  }
+  measure: count_last_month_spending_users {
+    group_label: "Counts"
+    type: count_distinct
+    sql:  ${user_id} ;;
+    filters: {
+      field: spent_last_month
+      value: "yes"
+    }
+    }
+
+  measure: count_repeat_users {
+    group_label: "Counts"
+    type:  count_distinct
+    sql:  ${user_id} ;;
+    filters: {
+      field: customer_facts.returned
+      value: "yes"
+    }
+    filters: {
+      field: spent_this_month
+      value: "yes"
+    }
+  }
+
+  measure: count_last_month_repeat_users {
+    group_label: "Counts"
+    type:  count_distinct
+    sql:  ${user_id} ;;
+    filters: {
+      field: customer_facts.returned
+      value: "yes"
+    }
+    filters: {
+      field: spent_last_month
+      value: "yes"
+    }
   }
 
   set: detail {
