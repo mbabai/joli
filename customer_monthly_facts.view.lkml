@@ -202,6 +202,7 @@ view: customer_monthly_facts {
   }
 
   measure: total_churn_percentage {
+    group_label: "Totals"
     description: "This is the same as total churn, but as a percent of the previous month.  (USE WITH CREATED MONTH)"
     type: number
     sql: 1.0 * ${total_churn} / NULLIF(${total_last_month_active_customer_value},0) ;;
