@@ -1,6 +1,6 @@
 view: transactions {
   derived_table: {
-    persist_for: "5 hours"
+    sql_trigger_value: SELECT MAX(datetime) FROM square_transactions_raw;;
     sql: SELECT *
         , RANK() OVER (PARTITION BY user_id ORDER BY created_at) AS transaction_sequence_number
        FROM (
